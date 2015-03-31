@@ -1,0 +1,10 @@
+<seelog type="sync">
+	<outputs formatid="main">
+		<filter levels="info">
+			<console />
+		</filter>
+	</outputs>
+	<formats>
+		<format id="main" format="%Date(2006/01/02) %Time [%File.%Line] [%LEV] %Msg%n"/>
+	</formats>
+</seelog>
