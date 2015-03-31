@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"github.com/jiangzhx/go/redis"
+	"github.com/jiangzhx/redis-proxy/redis"
 	"testing"
 	"time"
 )

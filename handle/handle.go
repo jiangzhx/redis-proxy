@@ -4,7 +4,7 @@ import (
 	"fmt"
 	//	log "github.com/cihub/seelog"
 	ketama "github.com/dgryski/go-ketama"
-	"github.com/jiangzhx/go/redis"
+	"github.com/jiangzhx/redis-proxy/redis"
 	"strconv"
 	"time"
 )
@@ -21,6 +21,12 @@ type Node struct {
 	Redispool *redis.Pool
 }
 
+func GetNodeActivePoolSize() {
+	for _, node := range nodes {
+		fmt.Println(node.Redispool.ActiveCount())
+	}
+}
+
 func initSlots(size int) []ketama.Bucket {
 	var buckets []ketama.Bucket
 	for i := 1; i <= size; i++ {
@@ -32,8 +38,8 @@ func initSlots(size int) []ketama.Bucket {
 
 func initNodes() []Node {
 	var nodes []Node
-	nodes = append(nodes, Node{Start: 1, End: 512, Address: "x00:7379", Redispool: newPool("x00:7379", "")})
-	nodes = append(nodes, Node{Start: 513, End: 1024, Address: "x00:7379", Redispool: newPool("x00:7379", "")})
+	nodes = append(nodes, Node{Start: 1, End: 512, Address: "x01:7380", Redispool: newPool("x01:7380", "")})
+	nodes = append(nodes, Node{Start: 513, End: 1024, Address: "x01:7380", Redispool: newPool("x01:7380", "")})
 	return nodes
 }
 
@@ -59,9 +65,24 @@ func newPool(server, password string) *redis.Pool {
 			}
 			return c, err
 		},
-		//		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-		//			_, err := c.Do("PING")
-		//			return err
-		//		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
 	}
+}
+
+func Redirect(cmd []byte, args [][]byte) (reply interface{}, err error) {
+	new := make([]interface{}, len(args))
+	for i, v := range args {
+		new[i] = interface{}(v)
+	}
+	_node := KeyToNode(string(args[0]))
+	conn := _node.Redispool.Get()
+	defer conn.Close()
+	replay, err := conn.Do(string(cmd), new...)
+	//	log.Debug("CMD:", string(cmd))
+	//	log.Debug("ARGS:", args)
+	//	log.Debug("ADDRESS:", _node.Address)
+	return replay, err
 }

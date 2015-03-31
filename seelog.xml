@@ -1,6 +1,6 @@
 <seelog type="sync">
 	<outputs formatid="main">
-		<filter levels="info">
+		<filter levels="info,error">
 			<console />
 		</filter>
 	</outputs>

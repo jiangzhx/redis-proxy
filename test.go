@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	//	"github.com/jiangzhx/go/redis"
-	"github.com/garyburd/redigo/redis"
+	"github.com/jiangzhx/redis-proxy/redis"
+	//	"github.com/garyburd/redigo/redis"
 	"time"
 )
 
@@ -40,18 +40,13 @@ func set(conn redis.Conn) {
 
 func main() {
 	s := time.Now().Local()
-
 	pool := newPool("x00:7379")
-
-	conn := pool.Get()
-
 	for i := 0; i < 100; i++ {
-		//		fmt.Println("poolsize:", pool.ActiveCount())
-
+		fmt.Println("activesize:", pool.ActiveCount())
+		conn := pool.Get()
 		go set(conn)
 	}
 	time.Sleep(time.Second * 30)
 	e := time.Now().Local()
 	fmt.Println(e.Unix() - s.Unix())
-	//	t.Logf("size is %d \n", size)
 }
